@@ -6,8 +6,47 @@ public class Sudoku {
 	int xcurs = 1;
 	int ycurs = 2;
 	String[][] board = new String[13][13];
+	String[][] numbers = new String[9][9];
 	boolean[][] edit = new boolean[13][13];
 	int rannum = 0;
+
+	public void setNumbersArray(){
+		for (int i = 0; i < 9; i++){
+      if (i < 3){
+        for (int j = 0; j < 3; j++){
+  				numbers[i][j] = board[i+1][j+1];
+        }
+        for (int j = 3; j < 6; j++){
+  				numbers[i][j] = board[i+1][j+2];
+  			}
+        for (int j = 6; j < 9; j++){
+  				numbers[i][j] = board[i+1][j+3];
+  			}
+      }
+      else if (i < 6){
+        for (int j = 0; j < 3; j++){
+          numbers[i][j] = board[i+2][j+1];
+        }
+        for (int j = 3; j < 6; j++){
+          numbers[i][j] = board[i+2][j+2];
+        }
+        for (int j = 6; j < 9; j++){
+          numbers[i][j] = board[i+2][j+3];
+        }
+      }
+      else if (i < 9){
+        for (int j = 0; j < 3; j++){
+          numbers[i][j] = board[i+3][j+1];
+        }
+        for (int j = 3; j < 6; j++){
+          numbers[i][j] = board[i+3][j+2];
+        }
+        for (int j = 6; j < 9; j++){
+          numbers[i][j] = board[i+3][j+3];
+        }
+      }
+    }
+	}
 
 	public void setBlankBoard(){
 		for (int i = 0; i < board.length; i++){
@@ -27,6 +66,7 @@ public class Sudoku {
 				}
 			}
 		}
+    this.setNumbersArray();
 	}
 
 	public int getRandomNumber(){
@@ -118,6 +158,13 @@ public class Sudoku {
 	public static void main(String[] args){
 		Sudoku test = new Sudoku();
 		test.setBlankBoard();
+		test.setNumbersArray();
+		for (int i = 0; i < test.numbers.length; i++){
+			for (int j = 0; j < test.numbers.length; j++){
+				System.out.print(test.numbers[i][j]);
+			}
+		System.out.println();
+		}
 		test.printBoard();
 		do{
 			test.readInput();
