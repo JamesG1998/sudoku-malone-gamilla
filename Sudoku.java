@@ -1,19 +1,22 @@
 import java.util.*;
+import java.io.*;
 
 public class Sudoku {
 	Scanner keyboard = new Scanner(System.in);
 	Random r = new Random();
-	int xCurs;
-	int yCurs;
-	int[][] logic;
-	String[][] board;
-	boolean[][] edit;
+	private int xCurs;
+	private int yCurs;
+	private int[][] logic;
+	private String[][] board;
+	private boolean[][] edit;
+	private final int[] SOLVE = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
 
 	public Sudoku(){
 		xCurs = 4;
 		yCurs = 4;
-		logic = new int[][]
-		{
+		logic = new int[9][9]; //Creates a 9x9 in[][] of 0s.
+		/*{
 			{1, 2, 3, 4, 5, 6, 7, 8, 9},
 			{7, 8, 9, 1, 2, 3, 4, 5, 6},
 			{4, 5, 6, 7, 8, 9, 1, 2, 3},
@@ -23,7 +26,7 @@ public class Sudoku {
 			{8, 9, 1, 2, 3, 4, 5, 6, 7},
 			{5, 6, 7, 8, 9, 1, 2, 3, 4},
 			{2, 3, 4, 5, 6, 7, 8, 9, 1}
-		};
+		};*/
 		edit = new boolean[9][9];
 		for (int i = 0; i < 9; i++){
 			for (int j = 0; j < 9;j++){
@@ -80,12 +83,48 @@ public class Sudoku {
 
 	//"Clears" the screen by printing 100 empty lines.
 	public final static void clear(){
-		String repeat = new String(new char[100]).replace("",  "\n");
+		String repeat = new String(new char[100]).replace("", "\n");
 		System.out.println(repeat);
 	}
-
-
-
+	//Updates the Board String[][] with information from Logic int[][].
+	public void syncLogicToBoard(){
+		for (int i = 0; i < 9; i++){
+      if (i < 3){
+        for (int j = 0; j < 3; j++){
+  				board[i+1][j+1] = " " + logic[i][j] + " ";
+        }
+        for (int j = 3; j < 6; j++){
+  				board[i+1][j+2] = " " + logic[i][j] + " ";
+  			}
+        for (int j = 6; j < 9; j++){
+  				board[i+1][j+3] = " " + logic[i][j] + " ";
+  			}
+      }
+      else if (i < 6){
+        for (int j = 0; j < 3; j++){
+          board[i+2][j+1] = " " + logic[i][j] + " ";
+        }
+        for (int j = 3; j < 6; j++){
+          board[i+2][j+2] = " " + logic[i][j] + " ";
+        }
+        for (int j = 6; j < 9; j++){
+          board[i+2][j+3] = " " + logic[i][j] + " ";
+        }
+      }
+      else if (i < 9){
+        for (int j = 0; j < 3; j++){
+          board[i+3][j+1] = " " + logic[i][j] + " ";
+        }
+        for (int j = 3; j < 6; j++){
+          board[i+3][j+2] = " " + logic[i][j] + " ";
+        }
+        for (int j = 6; j < 9; j++){
+          board[i+3][j+3] = " " + logic[i][j] + " ";
+        }
+      }
+    }
+	}
+	//Updates the Logic int[][] with information from Board String[][].
 	public void syncBoardToLogic(){
 		for (int i = 0; i < 9; i++){
       if (i < 3){
@@ -123,13 +162,55 @@ public class Sudoku {
       }
     }
 	}
-
-	public void randomList(){
-		ArrayList<String> parameters = new ArrayList<>(9);
-		for (int i = 1; i < parameters.size(); i++) parameters.add(" " + i + " ");
-		Collections.shuffle(parameters);
-		for (int i = 0; i < parameters.size(); i++)
-		 	System.out.println(parameters.get(i));
+	//Returns a boolean dependant on the numbers int[][] being solved or not.
+	public boolean isSolved(){
+		int i, j, x, y, count;
+		boolean isSolved = true;
+		//The following checks if all rows are correct.
+		for (i = 0; i < logic.length; i++){
+			int[] row = new int[9];
+			for (j = 0; j < logic.length; j++){
+				row[j] = logic[i][j];
+			}
+			Arrays.sort(row);
+			if (!Arrays.equals(SOLVE, row)) isSolved = false;
+		}
+		//The following checks if all columns are correct.
+		for (i = 0; i < logic.length; i++){
+			int[] column = new int[9];
+			for (j = 0; j< logic.length; j++){
+				column[j] = logic[j][i];
+			}
+			Arrays.sort(column);
+			if (!Arrays.equals(SOLVE, column)) isSolved = false;
+		}
+		//The following checks if all 3x3 boxes are correct.
+		int[] box = new int[9];
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				count = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box[count] = logic[x][y];
+						count++;
+					}
+				}
+			Arrays.sort(box);
+			if (!Arrays.equals(SOLVE, box)) isSolved = false;
+			}
+		}
+		return isSolved;
+	}
+	//Retrieves a from Puzzle.class with puzzle number "puzzleNumber".
+	public void newPuzzle(int puzzleNumber) throws IOException{
+		Puzzle newPuzzle = new Puzzle(puzzleNumber);
+		newPuzzle.readFile();
+		int[][] puzzle = newPuzzle.getPuzzle();
+		for (int i = 0; i < 9; i++){
+			for (int j = 0; j < 9; j++){
+				logic[i][j] = puzzle[i][j];
+			}
+		}
 	}
 
 	public void setBlankBoard(){
@@ -236,13 +317,16 @@ public class Sudoku {
 		setBoard("< >");
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
 		Sudoku test = new Sudoku();
+		test.newPuzzle(1);
+		test.syncLogicToBoard();
 		for (int i = 0; i < test.board.length; i++){
 			for (int j = 0; j < test.board.length; j++){
 				System.out.print(test.board[i][j]);
 			}
 			System.out.println();
 		}
+		System.out.println("isSolved() = " + test.isSolved());
 	}
 }
