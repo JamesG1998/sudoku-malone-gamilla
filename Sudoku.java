@@ -207,6 +207,61 @@ public class Sudoku {
 		}
 		return isSolved;
 	}
+	//Returns a boolean dependant on the unsolved logic int[][] being solved or not.
+	//STILL NEEDS BUGFIXING!!!
+	public boolean isSolvable(){
+		int i, j, x, y, check1, check2, count;
+		boolean isSolvable = true;
+		//The following checks if all rows are solvable.
+		for (i = 0; i < logic.length; i++){
+			int[] row = new int[9];
+			for (j = 0; j < logic.length; j++){
+				row[j] = logic[i][j];
+			}
+			for (check1 = 0; check1 < row.length; check1++){
+				for (check2 = check1 + 1; check2 < row.length; check2++){
+					if ((check1 != check2) && (row[check1] == row[check2])){
+						isSolvable = false;
+					}
+				}
+			}
+		}
+		//The following checks if all columns are solvable.
+		for (i = 0; i < logic.length; i++){
+			int[] column = new int[9];
+			for (j = 0; j< logic.length; j++){
+				column[j] = logic[j][i];
+			}
+			for (check1 = 0; check1 < column.length; check1++){
+				for (check2 = check1 + 1; check2 < column.length; check2++){
+					if ((check1 != check2) && (column[check1] == column[check2])){
+						isSolvable = false;
+					}
+				}
+			}
+		}
+		//The following checks if all 3x3 boxes are solvable.
+		int[] box = new int[9];
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				count = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box[count] = logic[x][y];
+						count++;
+					}
+				}
+				for (check1 = 0; check1 < box.length; check1++){
+					for (check2 = check1 + 1; check2 < box.length; check2++){
+						if ((check1 != check2) && (box[check1] == box[check2])){
+							isSolvable = false;
+						}
+					}
+				}
+			}
+		}
+		return isSolvable;
+	}
 	//Retrieves a puzzle from Puzzle.class with puzzle number "puzzleNumber".
 	public void readPuzzle(int puzzleNumber) throws IOException{
 		Puzzle newPuzzle = new Puzzle(puzzleNumber);
@@ -244,12 +299,13 @@ public class Sudoku {
 	public void newPuzzle(int clues){
 		ArrayList<int[]> coordinates = new ArrayList<>(81);
 		int i, j, x, y;
+		boolean isSolvable;
+
 		for (i = 0; i < 9; i++){
 			for (j = 0; j < 9; j++){
 				coordinates.add(new int[] { i, j });
 			}
 		}
-		Collections.shuffle(coordinates);
 		for (i = 0; i < 81 - clues; i++){
 			x = coordinates.get(i)[0];
 			y = coordinates.get(i)[1];
@@ -259,16 +315,19 @@ public class Sudoku {
 	}
 	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
 	public void playLevel(int puzzleNumber) throws IOException{
+		clear();
 		this.readPuzzle(puzzleNumber);
 		this.syncLogicToBoard();
 		this.printBoard();
 	}
 	//Plays a freeplay Sudoku puzzle.
 	public void playFreeplay(int clues){
+		clear();
 		this.newPuzzle(clues);
 		this.syncLogicToBoard();
 		this.printBoard();
 	}
+
 	public void setBlankBoard(){
 		for (int i = 0; i < board.length; i++){
 			for (int j = 0; j < board.length; j++){

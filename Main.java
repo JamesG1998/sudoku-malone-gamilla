@@ -26,6 +26,7 @@ public class Main{
         help();
         break;
       case "4":
+        clear();
         System.exit(0);
       default:
         menu();
@@ -34,6 +35,10 @@ public class Main{
 
   public static void playLevels() throws IOException{
     clear();
+    System.out.println("+-------------------------------+");
+    System.out.println("|          Play Levels          |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("[1] Easy Levels");
     System.out.println("[2] Medium Levels");
     System.out.println("[3] Hard Levels");
@@ -59,6 +64,10 @@ public class Main{
   public static void easyLevels() throws IOException{
     clear();
     Sudoku puzzle = new Sudoku();
+    System.out.println("+-------------------------------+");
+    System.out.println("|          Easy Levels          |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("[1] Easy 1");
     System.out.println("[2] Easy 2");
     System.out.println("[3] Easy 3 *Not Available*");
@@ -83,6 +92,11 @@ public class Main{
 
   public static void mediumLevels() throws IOException{
     clear();
+    Sudoku puzzle = new Sudoku();
+    System.out.println("+-------------------------------+");
+    System.out.println("|         Medium Levels         |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("[1] Medium 1 *Not Available*");
     System.out.println("[2] Medium 2 *Not Available*");
     System.out.println("[3] Medium 3 *Not Available*");
@@ -107,6 +121,11 @@ public class Main{
 
   public static void hardLevels() throws IOException{
     clear();
+    Sudoku puzzle = new Sudoku();
+    System.out.println("+-------------------------------+");
+    System.out.println("|          Hard Levels          |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("[1] Hard 1 *Not Available*");
     System.out.println("[2] Hard 2 *Not Available*");
     System.out.println("[3] Hard 3 *Not Available*");
@@ -132,6 +151,10 @@ public class Main{
   public static void freeplay() throws IOException{
     clear();
     Sudoku puzzle = new Sudoku();
+    System.out.println("+-------------------------------+");
+    System.out.println("|           Freeplay            |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("[1] Start Freeplay");
     System.out.println("[2] Go Back");
     switch (input()){
@@ -151,6 +174,10 @@ public class Main{
 
   public static void help() throws IOException{
     clear();
+    System.out.println("+-------------------------------+");
+    System.out.println("|             Help              |");
+    System.out.println("+-------------------------------+");
+    System.out.println();
     System.out.println("Controls:");
     System.out.println("  W = Up       S = Down");
     System.out.println("  A = Left     D = Right");
@@ -168,9 +195,17 @@ public class Main{
     }
   }
 
-  public static String input(){
+  public static String input() throws IOException{
     Scanner input = new Scanner(System.in);
     String output = input.nextLine();
+    switch (output.toLowerCase()){
+      case "menu":
+        menu();
+        break;
+      case "quit":
+        clear();
+        System.exit(0);
+    }
     return output;
   }
 
