@@ -257,7 +257,18 @@ public class Sudoku {
 		}
 		this.shuffle();
 	}
-
+	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
+	public void playLevel(int puzzleNumber) throws IOException{
+		this.readPuzzle(puzzleNumber);
+		this.syncLogicToBoard();
+		this.printBoard();
+	}
+	//Plays a freeplay Sudoku puzzle.
+	public void playFreeplay(int clues){
+		this.newPuzzle(clues);
+		this.syncLogicToBoard();
+		this.printBoard();
+	}
 	public void setBlankBoard(){
 		for (int i = 0; i < board.length; i++){
 			for (int j = 0; j < board.length; j++){
