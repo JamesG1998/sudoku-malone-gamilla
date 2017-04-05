@@ -306,6 +306,7 @@ public class Sudoku {
 				coordinates.add(new int[] { i, j });
 			}
 		}
+		Collections.shuffle(coordinates);
 		for (i = 0; i < 81 - clues; i++){
 			x = coordinates.get(i)[0];
 			y = coordinates.get(i)[1];
