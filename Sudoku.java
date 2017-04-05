@@ -15,8 +15,8 @@ public class Sudoku {
 	public Sudoku(){
 		xCurs = 4;
 		yCurs = 4;
-		logic = new int[9][9]; //Creates a 9x9 in[][] of 0s.
-		/*{
+		logic = new int[][]
+		{
 			{1, 2, 3, 4, 5, 6, 7, 8, 9},
 			{7, 8, 9, 1, 2, 3, 4, 5, 6},
 			{4, 5, 6, 7, 8, 9, 1, 2, 3},
@@ -26,7 +26,7 @@ public class Sudoku {
 			{8, 9, 1, 2, 3, 4, 5, 6, 7},
 			{5, 6, 7, 8, 9, 1, 2, 3, 4},
 			{2, 3, 4, 5, 6, 7, 8, 9, 1}
-		};*/
+		};
 		edit = new boolean[9][9];
 		for (int i = 0; i < 9; i++){
 			for (int j = 0; j < 9;j++){
@@ -88,43 +88,49 @@ public class Sudoku {
 	}
 	//Updates the Board String[][] with information from Logic int[][].
 	public void syncLogicToBoard(){
-		for (int i = 0; i < 9; i++){
+		int i, j;
+		for (i = 0; i < 9; i++){
       if (i < 3){
-        for (int j = 0; j < 3; j++){
+        for (j = 0; j < 3; j++){
   				board[i+1][j+1] = " " + logic[i][j] + " ";
         }
-        for (int j = 3; j < 6; j++){
+        for (j = 3; j < 6; j++){
   				board[i+1][j+2] = " " + logic[i][j] + " ";
   			}
-        for (int j = 6; j < 9; j++){
+        for (j = 6; j < 9; j++){
   				board[i+1][j+3] = " " + logic[i][j] + " ";
   			}
       }
       else if (i < 6){
-        for (int j = 0; j < 3; j++){
+        for (j = 0; j < 3; j++){
           board[i+2][j+1] = " " + logic[i][j] + " ";
         }
-        for (int j = 3; j < 6; j++){
+        for (j = 3; j < 6; j++){
           board[i+2][j+2] = " " + logic[i][j] + " ";
         }
-        for (int j = 6; j < 9; j++){
+        for (j = 6; j < 9; j++){
           board[i+2][j+3] = " " + logic[i][j] + " ";
         }
       }
       else if (i < 9){
-        for (int j = 0; j < 3; j++){
+        for (j = 0; j < 3; j++){
           board[i+3][j+1] = " " + logic[i][j] + " ";
         }
-        for (int j = 3; j < 6; j++){
+        for (j = 3; j < 6; j++){
           board[i+3][j+2] = " " + logic[i][j] + " ";
         }
-        for (int j = 6; j < 9; j++){
+        for (j = 6; j < 9; j++){
           board[i+3][j+3] = " " + logic[i][j] + " ";
         }
       }
     }
+		for (i = 0; i < 13; i++){
+			for (j = 0; j < 13; j++){
+				if (board[i][j].equals(" 0 ")) board[i][j] = " . ";
+			}
+		}
 	}
-	//Updates the Logic int[][] with information from Board String[][].
+	//Updates the logic int[][] with information from Board String[][].
 	public void syncBoardToLogic(){
 		for (int i = 0; i < 9; i++){
       if (i < 3){
@@ -162,7 +168,7 @@ public class Sudoku {
       }
     }
 	}
-	//Returns a boolean dependant on the numbers int[][] being solved or not.
+	//Returns a boolean dependant on the logic int[][] being solved or not.
 	public boolean isSolved(){
 		int i, j, x, y, count;
 		boolean isSolved = true;
@@ -201,8 +207,8 @@ public class Sudoku {
 		}
 		return isSolved;
 	}
-	//Retrieves a from Puzzle.class with puzzle number "puzzleNumber".
-	public void newPuzzle(int puzzleNumber) throws IOException{
+	//Retrieves a puzzle from Puzzle.class with puzzle number "puzzleNumber".
+	public void readPuzzle(int puzzleNumber) throws IOException{
 		Puzzle newPuzzle = new Puzzle(puzzleNumber);
 		newPuzzle.readFile();
 		int[][] puzzle = newPuzzle.getPuzzle();
@@ -211,6 +217,45 @@ public class Sudoku {
 				logic[i][j] = puzzle[i][j];
 			}
 		}
+	}
+	//Shuffles the arrangement of ints within boxes in the logic int[][] array.
+	private void shuffle(){
+		ArrayList<Integer> box = new ArrayList<>(9);
+		int i, j, x, y, index;
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box.add(logic[x][y]);
+					}
+				}
+			Collections.shuffle(box);
+			index = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						logic[x][y] = box.get(index);
+						index++;
+					}
+				}
+			}
+		}
+	}
+	//Removes and shuffles random ints until there are "clues" number of ints left.
+	public void newPuzzle(int clues){
+		ArrayList<int[]> coordinates = new ArrayList<>(81);
+		int i, j, x, y;
+		for (i = 0; i < 9; i++){
+			for (j = 0; j < 9; j++){
+				coordinates.add(new int[] { i, j });
+			}
+		}
+		Collections.shuffle(coordinates);
+		for (i = 0; i < 81 - clues; i++){
+			x = coordinates.get(i)[0];
+			y = coordinates.get(i)[1];
+			logic[x][y] = 0;
+		}
+		this.shuffle();
 	}
 
 	public void setBlankBoard(){
@@ -230,17 +275,6 @@ public class Sudoku {
 					board[j][i]=" + ";
 				}
 			}
-		}
-	}
-
-	public int getRandomNumber(){
-		return r.nextInt(9)+1;
-	}
-
-	public void setRandBoard(int diff){
-		for (int d = 0; d<=diff; d++){
-
-
 		}
 	}
 
@@ -319,14 +353,17 @@ public class Sudoku {
 
 	public static void main(String[] args) throws IOException{
 		Sudoku test = new Sudoku();
-		test.newPuzzle(1);
+		System.out.println("readPuzzle() test: ");
+		test.readPuzzle(2);
 		test.syncLogicToBoard();
-		for (int i = 0; i < test.board.length; i++){
-			for (int j = 0; j < test.board.length; j++){
-				System.out.print(test.board[i][j]);
-			}
-			System.out.println();
-		}
+		test.printBoard();
+		System.out.println("isSolved() = " + test.isSolved());
+		System.out.println();
+
+		System.out.println("newPuzzle() test: ");
+		test.newPuzzle(30);
+		test.syncLogicToBoard();
+		test.printBoard();
 		System.out.println("isSolved() = " + test.isSolved());
 	}
 }

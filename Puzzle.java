@@ -18,6 +18,9 @@ public class Puzzle{
     switch (puzzleNumber){
       case 1:
         puzzleFile = "puzzle1.txt";
+        break;
+      case 2:
+        puzzleFile = "puzzle2.txt";
     }
     File inFile = new File(puzzleFile);
     if (!inFile.exists()){
