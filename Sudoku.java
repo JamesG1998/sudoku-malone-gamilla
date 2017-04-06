@@ -360,7 +360,6 @@ public class Sudoku{
 		if(cursorIsEdit()){
 			if (numinput == "0"){
 				if (isEdit(xCurs,yCurs)){
-					System.out.println("363");
 					setBoard(placeholder);
 				}
 				else{
@@ -373,18 +372,46 @@ public class Sudoku{
 			}
 		}
 		switch(c){
-			case 's': yCurs++;
-				while (!cursorIsEdit()){
-					yCurs++;} break;
-			case 'a': xCurs--;
-				while (!cursorIsEdit()){
-					xCurs--;} break;
-			case 'w': yCurs--;
-				while (!cursorIsEdit()){
-					yCurs--;} break;
-			case 'd': xCurs++;
-				while (!cursorIsEdit()){
-					xCurs++;} break;
+			case 's':
+				do{
+					yCurs++;
+					if(yCurs>=board.length){
+						do{
+							yCurs--;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'a':
+				do{
+					xCurs--;
+					if(xCurs<0){
+						do{
+							xCurs++;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'w':
+				do{
+					yCurs--;
+					if(yCurs<0){
+						do{
+							yCurs++;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'd':
+				do{
+					xCurs++;
+					if(xCurs>=board.length){
+						do{
+							xCurs--;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
 		}
 		placeholder = board[yCurs][xCurs];
 		setBoard("< >");
@@ -398,7 +425,7 @@ public class Sudoku{
 		test.printBoard();
 		do{
 			test.readInput();
-			//clear();
+			clear();
 			test.printBoard();
 		}while(test.play);
 		System.out.println("isSolved() = " + test.isSolved());
