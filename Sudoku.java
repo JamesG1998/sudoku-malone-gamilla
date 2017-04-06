@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Sudoku {
+public class Sudoku{
 	Scanner keyboard = new Scanner(System.in);
 	Random r = new Random();
 	private int xCurs;
@@ -10,15 +10,19 @@ public class Sudoku {
 	private String[][] board;
 	private boolean[][] edit;
 	private final int[] SOLVE = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+	String numinput = "0";
+	boolean play = true;
+	String placeholder ="";
+
 
 	public Sudoku(){
-		xCurs = 4;
-		yCurs = 4;
+		xCurs = 1;
+		yCurs = 1;
 		logic = new int[9][9];
-		edit = new boolean[9][9];
+		edit = new boolean[13][13]; //edit is 13 by 13.
 		for (int i = 0; i < 9; i++){
 			for (int j = 0; j < 9;j++){
-				edit[i][j] = true;
+				edit[i][j] = false; //Marina edit. All cells are initially uneditable.
 			}
 		}
 		board = new String[13][13];
@@ -114,7 +118,10 @@ public class Sudoku {
     }
 		for (i = 0; i < 13; i++){
 			for (j = 0; j < 13; j++){
-				if (board[i][j].equals(" 0 ")) board[i][j] = " . ";
+				if (board[i][j].equals(" 0 ")){ 
+					board[i][j] = " . ";
+					edit[i][j] = true; //Marina edit. Updates unprewritten cells as editable.
+				}
 			}
 		}
 	}
@@ -195,7 +202,7 @@ public class Sudoku {
 		}
 		return isSolved;
 	}
-	//Returns a boolean dependant on the cell coordinates being valid or not.
+  //Returns a boolean dependant on the cell coordinates being valid or not.
 	public boolean isValid(int x, int y){
 		int i, j;
 		boolean valid = true;
@@ -270,19 +277,16 @@ public class Sudoku {
 	}
 	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
 	public void playLevel(int puzzleNumber) throws IOException{
-		clear();
 		this.readPuzzle(puzzleNumber);
 		this.syncLogicToBoard();
 		this.printBoard();
 	}
 	//Plays a freeplay Sudoku puzzle.
 	public void playFreeplay(int clues){
-		clear();
 		this.newPuzzle(clues);
 		this.syncLogicToBoard();
 		this.printBoard();
 	}
-
 	public void setBlankBoard(){
 		for (int i = 0; i < board.length; i++){
 			for (int j = 0; j < board.length; j++){
@@ -317,18 +321,14 @@ public class Sudoku {
 		System.out.println(" board:"+board[y][x]);
 	}
 
-	public boolean isBlank(int x,  int y){
-		if (board[y][x] == " . "||board[y][x]=="< >")
-			return true;
-		else{
-			return false;
-		}
+	public boolean isEdit(int x, int y){
+		return edit[y][x];
 	}
-
-	public boolean cursorIsBlank(){
-		return isBlank(xCurs, yCurs);
+	
+	public boolean cursorIsEdit(){
+		return isEdit(xCurs, yCurs);
 	}
-
+	
 	public void setBoard(String s){
 		board[yCurs][xCurs] = s;
 	}
@@ -342,37 +342,89 @@ public class Sudoku {
 				input = keyboard.nextLine();
 			}while(input.length()==0);
 			c = input.charAt(0);
-		}while(!(c>='1'&&c<='9')&&!(c=='w'||c=='a'||c=='s'||c=='d'));
+		}while(!(c>='1'&&c<='9')&&!(c=='w'||c=='a'||c=='s'||c=='d')&&c!='Q');
 		if((c>='1')&&(c<='9')){
-			setBoard(" "+input+" ");
-			System.out.println("65");
+			numinput = input.substring(0,1);
+			setBoard("<"+input+">");
 		}
 		else if(c=='w'||c=='a'||c=='s'||c=='d'){
 			moveCursor(c);
 		}
 		else{
-			System.out.println("71");
+			play = false;
 		}
+
 	}
 
+	public boolean isBlank(int x, int y){
+		if (board[y][x] == " . "||board[y][x]=="< >")
+			return true;
+		else{
+			return false;
+		}
+	}
+	
+	public boolean cursorIsBlank(){
+		return isBlank(xCurs,yCurs);
+	}
 	public void moveCursor(char c){
-		if(cursorIsBlank()){
-			setBoard(" . ");
+		if(cursorIsEdit()){
+			if (numinput == "0"){
+				if (isEdit(xCurs,yCurs)){
+					setBoard(placeholder);
+				}
+				else{
+					setBoard(" . ");
+				}
+			}
+			else{
+				setBoard("|"+numinput+"|");
+				numinput = "0";
+			}
 		}
 		switch(c){
-			case 's': yCurs++;
-				while (!cursorIsBlank()){
-					yCurs++;} break;
-			case 'a': xCurs--;
-				while (!cursorIsBlank()){
-					xCurs--;} break;
-			case 'w': yCurs--;
-				while (!cursorIsBlank()){
-					yCurs--;} break;
-			case 'd': xCurs++;
-				while (!cursorIsBlank()){
-					xCurs++;} break;
+			case 's':
+				do{
+					yCurs++;
+					if(yCurs>=board.length){
+						do{
+							yCurs--;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'a':
+				do{
+					xCurs--;
+					if(xCurs<0){
+						do{
+							xCurs++;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'w':
+				do{
+					yCurs--;
+					if(yCurs<0){
+						do{
+							yCurs++;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
+			case 'd':
+				do{
+					xCurs++;
+					if(xCurs>=board.length){
+						do{
+							xCurs--;
+						}while(!cursorIsEdit());
+					}
+				}while (!cursorIsEdit());
+				break;
 		}
+		placeholder = board[yCurs][xCurs];
 		setBoard("< >");
 	}
 
@@ -382,13 +434,19 @@ public class Sudoku {
 		test.readPuzzle(2);
 		test.syncLogicToBoard();
 		test.printBoard();
+		do{
+			test.readInput();
+			clear();
+			test.printBoard();
+		}while(test.play);
 		System.out.println("isSolved() = " + test.isSolved());
 		System.out.println();
 
-		System.out.println("newPuzzle() test: ");
+		/*System.out.println("newPuzzle() test: ");
 		test.newPuzzle(30);
 		test.syncLogicToBoard();
 		test.printBoard();
 		System.out.println("isSolved() = " + test.isSolved());
+		*/
 	}
 }
