@@ -1,13 +1,16 @@
 import java.util.*;
+import java.io.*;
 
 public class Sudoku {
 	Scanner keyboard = new Scanner(System.in);
 	Random r = new Random();
-	int xCurs;
-	int yCurs;
-	int[][] logic;
-	String[][] board;
-	boolean[][] edit;
+	private int xCurs;
+	private int yCurs;
+	private int[][] logic;
+	private String[][] board;
+	private boolean[][] edit;
+	private final int[] SOLVE = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
 
 	public Sudoku(){
 		xCurs = 4;
@@ -80,12 +83,54 @@ public class Sudoku {
 
 	//"Clears" the screen by printing 100 empty lines.
 	public final static void clear(){
-		String repeat = new String(new char[100]).replace("",  "\n");
+		String repeat = new String(new char[100]).replace("", "\n");
 		System.out.println(repeat);
 	}
-
-
-
+	//Updates the Board String[][] with information from Logic int[][].
+	public void syncLogicToBoard(){
+		int i, j;
+		for (i = 0; i < 9; i++){
+      if (i < 3){
+        for (j = 0; j < 3; j++){
+  				board[i+1][j+1] = " " + logic[i][j] + " ";
+        }
+        for (j = 3; j < 6; j++){
+  				board[i+1][j+2] = " " + logic[i][j] + " ";
+  			}
+        for (j = 6; j < 9; j++){
+  				board[i+1][j+3] = " " + logic[i][j] + " ";
+  			}
+      }
+      else if (i < 6){
+        for (j = 0; j < 3; j++){
+          board[i+2][j+1] = " " + logic[i][j] + " ";
+        }
+        for (j = 3; j < 6; j++){
+          board[i+2][j+2] = " " + logic[i][j] + " ";
+        }
+        for (j = 6; j < 9; j++){
+          board[i+2][j+3] = " " + logic[i][j] + " ";
+        }
+      }
+      else if (i < 9){
+        for (j = 0; j < 3; j++){
+          board[i+3][j+1] = " " + logic[i][j] + " ";
+        }
+        for (j = 3; j < 6; j++){
+          board[i+3][j+2] = " " + logic[i][j] + " ";
+        }
+        for (j = 6; j < 9; j++){
+          board[i+3][j+3] = " " + logic[i][j] + " ";
+        }
+      }
+    }
+		for (i = 0; i < 13; i++){
+			for (j = 0; j < 13; j++){
+				if (board[i][j].equals(" 0 ")) board[i][j] = " . ";
+			}
+		}
+	}
+	//Updates the logic int[][] with information from Board String[][].
 	public void syncBoardToLogic(){
 		for (int i = 0; i < 9; i++){
       if (i < 3){
@@ -123,13 +168,165 @@ public class Sudoku {
       }
     }
 	}
+	//Returns a boolean dependant on the logic int[][] being solved or not.
+	public boolean isSolved(){
+		int i, j, x, y, count;
+		boolean isSolved = true;
+		//The following checks if all rows are correct.
+		for (i = 0; i < logic.length; i++){
+			int[] row = new int[9];
+			for (j = 0; j < logic.length; j++){
+				row[j] = logic[i][j];
+			}
+			Arrays.sort(row);
+			if (!Arrays.equals(SOLVE, row)) isSolved = false;
+		}
+		//The following checks if all columns are correct.
+		for (i = 0; i < logic.length; i++){
+			int[] column = new int[9];
+			for (j = 0; j< logic.length; j++){
+				column[j] = logic[j][i];
+			}
+			Arrays.sort(column);
+			if (!Arrays.equals(SOLVE, column)) isSolved = false;
+		}
+		//The following checks if all 3x3 boxes are correct.
+		int[] box = new int[9];
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				count = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box[count] = logic[x][y];
+						count++;
+					}
+				}
+			Arrays.sort(box);
+			if (!Arrays.equals(SOLVE, box)) isSolved = false;
+			}
+		}
+		return isSolved;
+	}
+	//Returns a boolean dependant on the unsolved logic int[][] being solved or not.
+	//STILL NEEDS BUGFIXING!!!
+	public boolean isSolvable(){
+		int i, j, x, y, check1, check2, count;
+		boolean isSolvable = true;
+		//The following checks if all rows are solvable.
+		for (i = 0; i < logic.length; i++){
+			int[] row = new int[9];
+			for (j = 0; j < logic.length; j++){
+				row[j] = logic[i][j];
+			}
+			for (check1 = 0; check1 < row.length; check1++){
+				for (check2 = check1 + 1; check2 < row.length; check2++){
+					if ((check1 != check2) && (row[check1] == row[check2])){
+						isSolvable = false;
+					}
+				}
+			}
+		}
+		//The following checks if all columns are solvable.
+		for (i = 0; i < logic.length; i++){
+			int[] column = new int[9];
+			for (j = 0; j< logic.length; j++){
+				column[j] = logic[j][i];
+			}
+			for (check1 = 0; check1 < column.length; check1++){
+				for (check2 = check1 + 1; check2 < column.length; check2++){
+					if ((check1 != check2) && (column[check1] == column[check2])){
+						isSolvable = false;
+					}
+				}
+			}
+		}
+		//The following checks if all 3x3 boxes are solvable.
+		int[] box = new int[9];
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				count = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box[count] = logic[x][y];
+						count++;
+					}
+				}
+				for (check1 = 0; check1 < box.length; check1++){
+					for (check2 = check1 + 1; check2 < box.length; check2++){
+						if ((check1 != check2) && (box[check1] == box[check2])){
+							isSolvable = false;
+						}
+					}
+				}
+			}
+		}
+		return isSolvable;
+	}
+	//Retrieves a puzzle from Puzzle.class with puzzle number "puzzleNumber".
+	public void readPuzzle(int puzzleNumber) throws IOException{
+		Puzzle newPuzzle = new Puzzle(puzzleNumber);
+		newPuzzle.readFile();
+		int[][] puzzle = newPuzzle.getPuzzle();
+		for (int i = 0; i < 9; i++){
+			for (int j = 0; j < 9; j++){
+				logic[i][j] = puzzle[i][j];
+			}
+		}
+	}
+	//Shuffles the arrangement of ints within boxes in the logic int[][] array.
+	private void shuffle(){
+		ArrayList<Integer> box = new ArrayList<>(9);
+		int i, j, x, y, index;
+		for (i = 0; i < logic.length; i += 3){
+			for (j = 0; j < logic.length; j += 3){
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						box.add(logic[x][y]);
+					}
+				}
+			Collections.shuffle(box);
+			index = 0;
+				for (x = i; x < 3; x++){
+					for (y = j; y < 3; y++){
+						logic[x][y] = box.get(index);
+						index++;
+					}
+				}
+			}
+		}
+	}
+	//Removes and shuffles random ints until there are "clues" number of ints left.
+	public void newPuzzle(int clues){
+		ArrayList<int[]> coordinates = new ArrayList<>(81);
+		int i, j, x, y;
+		boolean isSolvable;
 
-	public void randomList(){
-		ArrayList<String> parameters = new ArrayList<>(9);
-		for (int i = 1; i < parameters.size(); i++) parameters.add(" " + i + " ");
-		Collections.shuffle(parameters);
-		for (int i = 0; i < parameters.size(); i++)
-		 	System.out.println(parameters.get(i));
+		for (i = 0; i < 9; i++){
+			for (j = 0; j < 9; j++){
+				coordinates.add(new int[] { i, j });
+			}
+		}
+		Collections.shuffle(coordinates);
+		for (i = 0; i < 81 - clues; i++){
+			x = coordinates.get(i)[0];
+			y = coordinates.get(i)[1];
+			logic[x][y] = 0;
+		}
+		this.shuffle();
+	}
+	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
+	public void playLevel(int puzzleNumber) throws IOException{
+		clear();
+		this.readPuzzle(puzzleNumber);
+		this.syncLogicToBoard();
+		this.printBoard();
+	}
+	//Plays a freeplay Sudoku puzzle.
+	public void playFreeplay(int clues){
+		clear();
+		this.newPuzzle(clues);
+		this.syncLogicToBoard();
+		this.printBoard();
 	}
 
 	public void setBlankBoard(){
@@ -149,17 +346,6 @@ public class Sudoku {
 					board[j][i]=" + ";
 				}
 			}
-		}
-	}
-
-	public int getRandomNumber(){
-		return r.nextInt(9)+1;
-	}
-
-	public void setRandBoard(int diff){
-		for (int d = 0; d<=diff; d++){
-
-
 		}
 	}
 
@@ -236,13 +422,19 @@ public class Sudoku {
 		setBoard("< >");
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
 		Sudoku test = new Sudoku();
-		for (int i = 0; i < test.board.length; i++){
-			for (int j = 0; j < test.board.length; j++){
-				System.out.print(test.board[i][j]);
-			}
-			System.out.println();
-		}
+		System.out.println("readPuzzle() test: ");
+		test.readPuzzle(2);
+		test.syncLogicToBoard();
+		test.printBoard();
+		System.out.println("isSolved() = " + test.isSolved());
+		System.out.println();
+
+		System.out.println("newPuzzle() test: ");
+		test.newPuzzle(30);
+		test.syncLogicToBoard();
+		test.printBoard();
+		System.out.println("isSolved() = " + test.isSolved());
 	}
 }
