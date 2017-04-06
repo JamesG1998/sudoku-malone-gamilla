@@ -1,4 +1,3 @@
-
 import java.util.*;
 import java.io.*;
 
@@ -19,18 +18,7 @@ public class Sudoku{
 	public Sudoku(){
 		xCurs = 1;
 		yCurs = 1;
-		logic = new int[][]
-		{
-			{1, 2, 3, 4, 5, 6, 7, 8, 9},
-			{7, 8, 9, 1, 2, 3, 4, 5, 6},
-			{4, 5, 6, 7, 8, 9, 1, 2, 3},
-			{9, 1, 2, 3, 4, 5, 6, 7, 8},
-			{6, 7, 8, 9, 1, 2, 3, 4, 5},
-			{3, 4, 5, 6, 7, 8, 9, 1, 2},
-			{8, 9, 1, 2, 3, 4, 5, 6, 7},
-			{5, 6, 7, 8, 9, 1, 2, 3, 4},
-			{2, 3, 4, 5, 6, 7, 8, 9, 1}
-		};
+		logic = new int[9][9];
 		edit = new boolean[13][13]; //edit is 13 by 13.
 		for (int i = 0; i < 9; i++){
 			for (int j = 0; j < 9;j++){
@@ -214,6 +202,21 @@ public class Sudoku{
 		}
 		return isSolved;
 	}
+  //Returns a boolean dependant on the cell coordinates being valid or not.
+	public boolean isValid(int x, int y){
+		int i, j;
+		boolean valid = true;
+		for (i = 0; i < 9; i++){
+			if (logic[x][i] == logic[x][y] && i != y) valid = false; //Checks validity of row.
+			if (logic[i][y] == logic[x][y] && i != x) valid = false; //Checks validity of column.
+		}
+		for (i = (x / 3) * 3; i < (x / 3) * 3 + 3; i++){
+			for (j = (y / 3) * 3; j < (y / 3) * 3 + 3; j++){
+				if (logic[i][j] == logic[x][y] && i != x && j != y) valid = false; //Checks validity of 3x3 box.
+			}
+		}
+		return valid;
+	}
 	//Retrieves a puzzle from Puzzle.class with puzzle number "puzzleNumber".
 	public void readPuzzle(int puzzleNumber) throws IOException{
 		Puzzle newPuzzle = new Puzzle(puzzleNumber);
@@ -250,19 +253,27 @@ public class Sudoku{
 	//Removes and shuffles random ints until there are "clues" number of ints left.
 	public void newPuzzle(int clues){
 		ArrayList<int[]> coordinates = new ArrayList<>(81);
-		int i, j, x, y;
+		int i, j, x, y, random, tries = 0;
+
 		for (i = 0; i < 9; i++){
 			for (j = 0; j < 9; j++){
 				coordinates.add(new int[] { i, j });
 			}
 		}
 		Collections.shuffle(coordinates);
-		for (i = 0; i < 81 - clues; i++){
+		for (i = 0; i < clues; i++){
 			x = coordinates.get(i)[0];
 			y = coordinates.get(i)[1];
-			logic[x][y] = 0;
+			logic[x][y] = r.nextInt(9) + 1;
+			if (this.isValid(x, y) == false){
+				i--;
+				tries++;
+			}
+			if (tries == 50){
+				i = tries = 0;
+				logic = new int[9][9];
+			}
 		}
-		this.shuffle();
 	}
 	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
 	public void playLevel(int puzzleNumber) throws IOException{
