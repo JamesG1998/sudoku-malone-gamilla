@@ -11,22 +11,10 @@ public class Sudoku {
 	private boolean[][] edit;
 	private final int[] SOLVE = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-
 	public Sudoku(){
 		xCurs = 4;
 		yCurs = 4;
-		logic = new int[][]
-		{
-			{1, 2, 3, 4, 5, 6, 7, 8, 9},
-			{7, 8, 9, 1, 2, 3, 4, 5, 6},
-			{4, 5, 6, 7, 8, 9, 1, 2, 3},
-			{9, 1, 2, 3, 4, 5, 6, 7, 8},
-			{6, 7, 8, 9, 1, 2, 3, 4, 5},
-			{3, 4, 5, 6, 7, 8, 9, 1, 2},
-			{8, 9, 1, 2, 3, 4, 5, 6, 7},
-			{5, 6, 7, 8, 9, 1, 2, 3, 4},
-			{2, 3, 4, 5, 6, 7, 8, 9, 1}
-		};
+		logic = new int[9][9];
 		edit = new boolean[9][9];
 		for (int i = 0; i < 9; i++){
 			for (int j = 0; j < 9;j++){
@@ -207,60 +195,20 @@ public class Sudoku {
 		}
 		return isSolved;
 	}
-	//Returns a boolean dependant on the unsolved logic int[][] being solved or not.
-	//STILL NEEDS BUGFIXING!!!
-	public boolean isSolvable(){
-		int i, j, x, y, check1, check2, count;
-		boolean isSolvable = true;
-		//The following checks if all rows are solvable.
-		for (i = 0; i < logic.length; i++){
-			int[] row = new int[9];
-			for (j = 0; j < logic.length; j++){
-				row[j] = logic[i][j];
-			}
-			for (check1 = 0; check1 < row.length; check1++){
-				for (check2 = check1 + 1; check2 < row.length; check2++){
-					if ((check1 != check2) && (row[check1] == row[check2])){
-						isSolvable = false;
-					}
-				}
+	//Returns a boolean dependant on the cell coordinates being valid or not.
+	public boolean isValid(int x, int y){
+		int i, j;
+		boolean valid = true;
+		for (i = 0; i < 9; i++){
+			if (logic[x][i] == logic[x][y] && i != y) valid = false; //Checks validity of row.
+			if (logic[i][y] == logic[x][y] && i != x) valid = false; //Checks validity of column.
+		}
+		for (i = (x / 3) * 3; i < (x / 3) * 3 + 3; i++){
+			for (j = (y / 3) * 3; j < (y / 3) * 3 + 3; j++){
+				if (logic[i][j] == logic[x][y] && i != x && j != y) valid = false; //Checks validity of 3x3 box.
 			}
 		}
-		//The following checks if all columns are solvable.
-		for (i = 0; i < logic.length; i++){
-			int[] column = new int[9];
-			for (j = 0; j< logic.length; j++){
-				column[j] = logic[j][i];
-			}
-			for (check1 = 0; check1 < column.length; check1++){
-				for (check2 = check1 + 1; check2 < column.length; check2++){
-					if ((check1 != check2) && (column[check1] == column[check2])){
-						isSolvable = false;
-					}
-				}
-			}
-		}
-		//The following checks if all 3x3 boxes are solvable.
-		int[] box = new int[9];
-		for (i = 0; i < logic.length; i += 3){
-			for (j = 0; j < logic.length; j += 3){
-				count = 0;
-				for (x = i; x < 3; x++){
-					for (y = j; y < 3; y++){
-						box[count] = logic[x][y];
-						count++;
-					}
-				}
-				for (check1 = 0; check1 < box.length; check1++){
-					for (check2 = check1 + 1; check2 < box.length; check2++){
-						if ((check1 != check2) && (box[check1] == box[check2])){
-							isSolvable = false;
-						}
-					}
-				}
-			}
-		}
-		return isSolvable;
+		return valid;
 	}
 	//Retrieves a puzzle from Puzzle.class with puzzle number "puzzleNumber".
 	public void readPuzzle(int puzzleNumber) throws IOException{
@@ -298,8 +246,7 @@ public class Sudoku {
 	//Removes and shuffles random ints until there are "clues" number of ints left.
 	public void newPuzzle(int clues){
 		ArrayList<int[]> coordinates = new ArrayList<>(81);
-		int i, j, x, y;
-		boolean isSolvable;
+		int i, j, x, y, random, tries = 0;
 
 		for (i = 0; i < 9; i++){
 			for (j = 0; j < 9; j++){
@@ -307,12 +254,19 @@ public class Sudoku {
 			}
 		}
 		Collections.shuffle(coordinates);
-		for (i = 0; i < 81 - clues; i++){
+		for (i = 0; i < clues; i++){
 			x = coordinates.get(i)[0];
 			y = coordinates.get(i)[1];
-			logic[x][y] = 0;
+			logic[x][y] = r.nextInt(9) + 1;
+			if (this.isValid(x, y) == false){
+				i--;
+				tries++;
+			}
+			if (tries == 50){
+				i = tries = 0;
+				logic = new int[9][9];
+			}
 		}
-		this.shuffle();
 	}
 	//Plays a level Sudoku puzzle of puzzle number "puzzleNumber".
 	public void playLevel(int puzzleNumber) throws IOException{
